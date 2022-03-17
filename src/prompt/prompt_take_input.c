@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   prompt_take_input.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: coder <coder@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ebresser <ebresser@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/10 20:56:26 by joeduard          #+#    #+#             */
-/*   Updated: 2022/03/15 16:47:22 by coder            ###   ########.fr       */
+/*   Updated: 2022/03/16 23:39:14 by ebresser         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
+
 
 // Function to print Current Directory.
 void	print_dir(void)
@@ -22,19 +23,21 @@ void	print_dir(void)
 }
 
 /** Function to take input */
-int	take_input(char *str)
+int	take_input(char *input)
 {
 	char	*buf;
-
-	buf = readline("\nminishell>>> ");
+	char	*old_input;
+	char	*prompt;
+	
+	prompt = "\nConcatenar User:Dir$ ";//criar func
+	old_input = input;
+	buf = readline(prompt);
 	if (strlen(buf) != 0)
 	{
-		add_history(buf);
-		strcpy(str, buf);
-		return (0);
+		put_on_history(buf, old_input);
+		strcpy(input, buf);
+		return (SUCESS);
 	}
 	else
-	{
-		return (1);
-	}
+		return (FAIL);
 }

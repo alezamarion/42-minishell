@@ -4,13 +4,24 @@ LIBFT_DIR = libft
 LIBFT = $(LIBFT_DIR)/libft.a
 LIBFLAGS = -L$(LIBFT_DIR) -lft
 
-SRC_FILES = main.c minishell.c parse_token.c prompt_take_input.c execute.c \
+SRC_FILES = main.c \
+			executor.c \
+			parser.c \
+			prompt_take_input.c \
+			history.c \
+			str_tools.c
 
 SRC_DIR = src
 OBJ_DIR	= obj
 HEADERS := minishell.h
-OBJ = main.o minishell.o parse_token.o parse_pipe.o prompt_take_input.o execute.o
-# OBJ = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o) $(SRC_DIR)
+
+#OBJ = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o) $(SRC_DIR) # main.o minishell.o parse_token.o prompt_take_input.o
+OBJ =	main.o \
+		executor.o \
+		parser.o \
+		prompt_take_input.o \
+		history.o \
+		str_tools.o
 #INCLUDES = includes
 #HEADERS := $(INCLUDES)/minishell.h
 
@@ -18,12 +29,12 @@ OBJ = main.o minishell.o parse_token.o parse_pipe.o prompt_take_input.o execute.
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -lreadline
 
-VPATH = src src/execute src/parse src/prompt 
+VPATH = src src/parse src/prompt src/tools src/exec
 
 RM = rm -f
 
 $(OBJ_DIR)/%.o: /%.c $(HEADERS) #$(SRC_DIR)
-		$(CC) $(CFLAGS) -c $< -o $@  $(INCLUDES) 
+		$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES) 
 
 all: $(NAME)
 
@@ -38,8 +49,6 @@ $(LIBFT):
 
 $(OBJ_DIR):
 		mkdir -p $(OBJ_DIR)
-
-run:	./$(NAME)
 
 clean:
 	make -C $(LIBFT_DIR) fclean

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: coder <coder@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ebresser <ebresser@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/09 19:08:49 by joeduard          #+#    #+#             */
-/*   Updated: 2022/03/15 17:01:04 by coder            ###   ########.fr       */
+/*   Updated: 2022/03/17 00:01:20 by ebresser         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,42 +17,40 @@
 */
 #include "../minishell.h"
 
-char **g_envp;
-
-// void	init_shell(void)
-// {
-// 	char	*username;
-
-// 	clear();
-// 	printf("\n\n******************");
-// 	printf("\n\t****MY SHELL****");
-// 	printf("\n\n*******************");
-// 	username = getenv("USER");
-// 	printf("\n\n\nUSER is: @%s\n", username);
-// 	sleep(2);
-// 	clear();
-// }
-
-void init_data(t_data **data)
+void	wellcome(void)
 {
-	t_data *node;
+	char	*username;
 
-	node = (t_data *)malloc(sizeof(t_data));
-	node->exec_flag = 0;
-	*data = node;
-//	free(node);
+	clear();
+	username = getenv("USER");
+	printf("\n\n\nHi, @%s!\n", username);
+	clear();
 }
 
-int	main(int argc, char **argv, char **envp)
+void	init_shell(t_data *data)
 {
-	t_data *data;
+	data->input_string[0] = '\0';
+	data->parsed_args[0] = NULL;
+	data->parsed_args_piped[0] = NULL;
+	data->exec_flag = 0;
+}
 
-	(void)argc;
-	(void)argv;
-	g_envp = envp;
-//	init_shell();
-	init_data(&data);
+int	main(void)
+{
+	t_data data;
+
+	init_shell(&data);
 	while (1)
-		minishell(data);
+	{
+		if (take_input(data.input_string))
+			continue ;
+		printf(".......................INPUT: %s\n", data.input_string);
+		data.exec_flag = process_string(data.input_string, data.parsed_args,
+				data.parsed_args_piped);
+		if (data.exec_flag == 1)
+			exec_args(data.parsed_args);
+		if (data.exec_flag == 2)
+			exec_args_piped(data.parsed_args, data.parsed_args_piped);
+	}
 	return (0);
 }

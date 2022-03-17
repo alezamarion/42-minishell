@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   execute.c                                          :+:      :+:    :+:   */
+/*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: coder <coder@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ebresser <ebresser@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/11 18:33:34 by joeduard          #+#    #+#             */
-/*   Updated: 2022/03/15 16:54:06 by coder            ###   ########.fr       */
+/*   Created: 2022/03/08 23:19:00 by joeduard          #+#    #+#             */
+/*   Updated: 2022/03/16 23:50:57 by ebresser         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include"../../minishell.h"
+#include "../../minishell.h"
 
 // Function where the system command is executed
 void	exec_args(char **parsed)
@@ -82,7 +82,7 @@ void	exec_args_piped(char **parsed, char **parsedpipe)
 			close(pipefd[0]);
 			if (execvp(parsedpipe[0], parsedpipe) < 0)
 			{
-				printf("\nCould not execute command 2.. :D");
+				printf("\nCould not execute command 2..");
 				exit(0);
 			}
 		}
@@ -124,7 +124,6 @@ int	own_cmd_handler(char **parsed)
 	list_of_own_cmds[1] = "cd";
 	list_of_own_cmds[2] = "help";
 	list_of_own_cmds[3] = "hello";
-	printf("PARSED: %s\n", *parsed);
 	while (i < 4)
 	{
 		if (strcmp(parsed[0], list_of_own_cmds[i]) == 0)
