@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_substr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: azamario <azamario@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/01 12:50:02 by azamario          #+#    #+#             */
-/*   Updated: 2021/10/14 18:02:09 by azamario         ###   ########.fr       */
+/*   Updated: 2022/04/22 13:24:01 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,9 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	if (s == 0)
 		return (0);
 	substr_len = ft_strlen(s);
-	if (substr_len < len)
+	if (len > substr_len - start)
+		substr = (char *)malloc((substr_len - start + 1) * sizeof(char));
+	else if (substr_len < len)
 		substr = (char *)malloc((substr_len + 1) * sizeof(char));
 	else
 		substr = (char *)malloc((len + 1) * sizeof(char));

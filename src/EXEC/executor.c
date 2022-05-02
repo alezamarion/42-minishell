@@ -6,137 +6,118 @@
 /*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/08 23:19:00 by joeduard          #+#    #+#             */
-/*   Updated: 2022/03/24 18:54:41 by ocarlos-         ###   ########.fr       */
+/*   Updated: 2022/04/25 23:43:59 by ocarlos-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-void executor(t_data *data)
+void	ft_execve(t_data *data, int argve_index)
 {
-	if (data->exec_flag != -1)  //só executa se tiver algo pra executar, pode ser só def de variável
-		exec_selector(data);
-}
+	int		i;
 
-// Function to call one sys cmds
-void single_exec(t_data *data) //char **parsed)
-{
-	pid_t	pid;
-	int		builtin_flag;
-	int		index;
-
-	index = 0;
-
-	builtin_flag = is_builtins(data->argve[index][0]);
-	if (builtin_flag != 0)  // marca pra exec qdo é builtin
-		data->exec_flag = 1;
-	if (builtin_flag == 1)  // qdo for "exit" não forka
-		pid = 0;
-	else
-		pid = fork();
-	if (pid == -1)
+	data->path_aux = NULL;
+	i = 0;
+	while (data->command_path[i])
 	{
-		printf("Failed forking child..\n");
-		return;
-	}
-	else if (pid == 0)
-	{
-		if (builtin_flag)
-			builtin_exec(data, builtin_flag);
-		else if (execvp(data->argve[index][0], data->argve[0]) < 0) //mudar p execve - n vai rodar
-			printf("Could not execute command..\n");
-		exit(0);
-	}
-	else
-	{
-		wait(NULL);
-		return;
-	}
-}
-
-// Function to call multiple sys cmds
-void multiple_exec(t_data *data) //char **parsed, char **parsedpipe)
-{
-	int pipefd[2];
-	int index;
-	int	  builtin_flag;
-	pid_t p1;
-	pid_t p2;
-
-	index = 0;
-	if (pipe(pipefd) < 0)
-	{
-		printf("Pipe could not be initialized\n");
-		return;
-	}
-	p1 = fork();
-	builtin_flag = is_builtins(data->argve[index][0]);
-	if (p1 < 0)
-	{
-		printf("Could not fork\n");
-		return;
-	}
-	if (p1 == 0)
-	{
-		close(pipefd[0]);
-		dup2(pipefd[1], STDOUT_FILENO);
-		close(pipefd[1]);
-
-		if (builtin_flag)
-			builtin_exec(data, builtin_flag);
-		else if (execvp(data->argve[index][0], data->argve[0]) < 0) //n vai rodar
+		data->path_aux = ft_strjoin(data->command_path[i], \
+			data->argve[argve_index][0]);
+		if (execve(data->path_aux, data->argve[argve_index], data->envp) < 0)
 		{
-			printf("Could not execute command 1..\n");
-			exit(0);
-		}
-	}
-	else
-	{
-		index++;
-		p2 = fork();
-		builtin_flag = is_builtins(data->argve[index][0]);
-		if (p2 < 0)
-		{
-			printf("Could not fork\n");
-			return;
-		}
-		if (p2 == 0)
-		{
-			close(pipefd[1]);
-			dup2(pipefd[0], STDIN_FILENO);
-			close(pipefd[0]);
-			if (builtin_flag)
-				builtin_exec(data, builtin_flag);
-			else if (execvp(data->argve[index][0], data->argve[1]) < 0) //n vai rodar
+			if (data->path_aux)
 			{
-				printf("Could not execute command 2..\n");
-				exit(0);
+				free(data->path_aux);
+				data->path_aux = NULL;
 			}
-		}
-		else
-		{
-			wait(NULL);
-			wait(NULL);
+			i++;
 		}
 	}
+	printf("Minishell: command not found: %s\n", data->argve[argve_index][0]);
 }
 
-
-// Function to call builtin commands
-void builtin_exec(t_data *data, int code)
+void	builtin_exec(t_data *data, int code)
 {
-	if (code == EXIT)		
-		exit_minishell(data, code);
+	if (code == EXIT)
+		mini_exit(data);
 	else if (code == CD)
 		chdir(data->argve[0][1]);
 	else if (code == ECHO)
 		echo(data);
 	else if (code == HELLO)
-		hello();	
+		hello();
 	else if (code == HELP)
-		open_help();	
+		open_help();
+	else if (code == PWD)
+		pwd();
+	else if (code == ENV)
+	 	env(data);
 }
 
+int	execute_pid(t_data *data, int id)
+{
+	int	builtin_flag;
 
+	exec_signals();
+	redirect_filter(data, id);
+	builtin_flag = is_builtins(data->argve[id][0]);
+	if (builtin_flag)
+	{
+		builtin_exec(data, builtin_flag);
+		exit (SUCCESS);
+	}
+	else
+	{
+		ft_execve(data, id);
+		exit (FAILURE);
+	}
+}
 
+void	create_executor_parametes(t_data *data)
+{
+	int		i;
 
+	i = 0;
+	data->pid = (int *)ft_calloc(sizeof(int), data->number_of_pipes + 1);
+	data->fd = (int **)ft_calloc(sizeof(int *), data->number_of_pipes + 1);
+	if (!data->pid || !data->fd)
+		exit_minishell(data, FAILURE);
+	while (i < data->number_of_pipes)
+	{
+		data->fd[i] = (int *)malloc(sizeof(int) * 2);
+		if (!data->fd[i])
+			exit_minishell(data, FAILURE);
+		i++;
+	}
+}
+
+int	executor(t_data *data)
+{
+	int		id;
+
+	check_exit(data);
+	create_executor_parametes(data);
+	open_pipes(data);
+	id = 0;
+	if (data->exec_flag == -1)
+		return SUCCESS;
+	while (id < data->number_of_pipes + 1)
+	{
+		data->pid[id] = fork();
+		if (data->pid[id] < 0)
+		{
+			perror("Fork");
+			return (FAILURE);
+		}
+		if (data->pid[id] == 0)
+		{	
+			scope_fd_select(id, data);
+			execute_pid(data, id);
+			return (SUCCESS);
+		}
+		if (data->path_aux)
+			free(data->path_aux);
+		id++;
+	}
+	main_process_handler(data);
+	return (SUCCESS); //tratar erros
+}

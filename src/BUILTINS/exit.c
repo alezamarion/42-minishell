@@ -3,22 +3,44 @@
 /*                                                        :::      ::::::::   */
 /*   exit.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/21 19:27:43 by ebresser          #+#    #+#             */
-/*   Updated: 2022/03/23 22:16:54 by ocarlos-         ###   ########.fr       */
+/*   Updated: 2022/04/23 13:31:08 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
 int	exit_minishell(t_data *data, int status)
-{
-	if (status == 0)
-		printf("\nGoodbye!\n");
-	clear_list(data->vars);
+{	
 	data_clean(data);
-	//free_double_str(&data->envp);  // não foi alocado por malloc
+	if (data->old_input)
+		free(data->old_input);
+	double_free((void ***)&data->command_path);
 	rl_clear_history();
+	free(data);
 	exit (status);
+}
+
+void	check_exit(t_data *data)
+{
+	int	builtin_flag;
+
+	if (data->number_of_pipes == 0)
+	{
+		builtin_flag = is_builtins(data->argve[0][0]);
+		if (builtin_flag == EXIT)
+			mini_exit(data);
+	}
+}
+
+void	mini_exit(t_data *data)
+{
+	if (data->number_of_pipes == 0)
+	{
+		data->exit_flag = TRUE; //Setada apenas no pai (single exec)
+		printf("\nGoodbye!\n");
+		exit_minishell(data, SUCCESS);
+	}	
 }
