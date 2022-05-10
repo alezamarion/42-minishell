@@ -6,7 +6,7 @@
 /*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 21:09:01 by ebresser          #+#    #+#             */
-/*   Updated: 2022/04/23 13:25:38 by vlima-nu         ###   ########.fr       */
+/*   Updated: 2022/05/02 23:04:56 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,6 @@
 
 void	put_on_history(char *buf, char *old_input)
 {
-	if (!old_input || ft_strcmp(old_input, buf)) //N repete hist
+	if (!old_input || ft_strcmp(old_input, buf))
 		add_history(buf);
 }

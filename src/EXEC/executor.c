@@ -6,43 +6,44 @@
 /*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/08 23:19:00 by joeduard          #+#    #+#             */
-/*   Updated: 2022/04/25 23:43:59 by ocarlos-         ###   ########.fr       */
+/*   Updated: 2022/05/04 01:27:21 by ocarlos-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-void	ft_execve(t_data *data, int argve_index)
+void	ft_execve(t_data *data, int id)
 {
 	int		i;
+	char	*path_aux;
 
-	data->path_aux = NULL;
+	path_aux = NULL;
 	i = 0;
 	while (data->command_path[i])
 	{
-		data->path_aux = ft_strjoin(data->command_path[i], \
-			data->argve[argve_index][0]);
-		if (execve(data->path_aux, data->argve[argve_index], data->envp) < 0)
+		path_aux = ft_strjoin(data->command_path[i], data->argve[id][0]);
+		if (execve(path_aux, data->argve[id], data->envp) < 0)
 		{
-			if (data->path_aux)
+			if (path_aux)
 			{
-				free(data->path_aux);
-				data->path_aux = NULL;
+				free(path_aux);
+				path_aux = NULL;
 			}
 			i++;
 		}
 	}
-	printf("Minishell: command not found: %s\n", data->argve[argve_index][0]);
+	ft_printf(STDERR, "Minishell: command not found: %s\n", data->argve[id][0]);
+	exit(127);
 }
 
-void	builtin_exec(t_data *data, int code)
+void	builtin_exec(t_data *data, int code, int id)
 {
-	if (code == EXIT)
+	if (code == EXIT && !data->number_of_pipes)
 		mini_exit(data);
-	else if (code == CD)
-		chdir(data->argve[0][1]);
+	else if (code == CD && !data->number_of_pipes)
+		cd(data, id);
 	else if (code == ECHO)
-		echo(data);
+		echo(data, id);
 	else if (code == HELLO)
 		hello();
 	else if (code == HELP)
@@ -50,7 +51,11 @@ void	builtin_exec(t_data *data, int code)
 	else if (code == PWD)
 		pwd();
 	else if (code == ENV)
-	 	env(data);
+		env(data);
+	else if (code == UNSET && !data->number_of_pipes)
+		unset(data, id);
+	else if (code == EXPORT && !data->number_of_pipes)
+		export(data, id);
 }
 
 int	execute_pid(t_data *data, int id)
@@ -58,18 +63,12 @@ int	execute_pid(t_data *data, int id)
 	int	builtin_flag;
 
 	exec_signals();
-	redirect_filter(data, id);
 	builtin_flag = is_builtins(data->argve[id][0]);
 	if (builtin_flag)
-	{
-		builtin_exec(data, builtin_flag);
-		exit (SUCCESS);
-	}
+		builtin_exec(data, builtin_flag, id);
 	else
-	{
 		ft_execve(data, id);
-		exit (FAILURE);
-	}
+	exit(SUCCESS);
 }
 
 void	create_executor_parametes(t_data *data)
@@ -94,30 +93,30 @@ int	executor(t_data *data)
 {
 	int		id;
 
-	check_exit(data);
+	if (!data->number_of_pipes && is_builtins(data->argve[0][0]))
+		return (execute_one_cmd(data));
+	if (data->exec_flag == -1)  // added to avoid execution if input is var definition
+		return (SUCCESS);
+	id = -1;
 	create_executor_parametes(data);
 	open_pipes(data);
-	id = 0;
-	if (data->exec_flag == -1)
-		return SUCCESS;
-	while (id < data->number_of_pipes + 1)
+	while (++id < data->number_of_pipes + 1)
 	{
 		data->pid[id] = fork();
 		if (data->pid[id] < 0)
 		{
-			perror("Fork");
+			perror("Minishell: Could not fork proccess: ");
 			return (FAILURE);
 		}
-		if (data->pid[id] == 0)
-		{	
-			scope_fd_select(id, data);
+		if (!data->pid[id])
+		{
+			close_other_fds(id, data);
+			file_descriptor_handler(id, data);
+			redirect_filter(data, id);
 			execute_pid(data, id);
-			return (SUCCESS);
 		}
-		if (data->path_aux)
-			free(data->path_aux);
-		id++;
+		waitpid(data->pid[id], &data->child_ret, 0);
 	}
 	main_process_handler(data);
-	return (SUCCESS); //tratar erros
+	return (SUCCESS);
 }

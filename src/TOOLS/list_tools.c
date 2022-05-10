@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   list_tools.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/23 17:30:51 by ocarlos-          #+#    #+#             */
-/*   Updated: 2022/04/24 14:04:32 by ocarlos-         ###   ########.fr       */
+/*   Updated: 2022/05/02 23:20:23 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ t_vars	*new_node(char *name, char *value)
 	new->var_value = ft_strdup(value);
 	new->next = NULL;
 	new->env = -1;
-	new->is_malloc = 1;
 	return (new);
 }
 
@@ -88,17 +87,18 @@ t_vdt	find_in_list(char *var_name, t_vars *lst)
 	}
 	var_name--;
 	if (lst != 0x0)
+	{
 		while (lst)
 		{
 			if (ft_strcmp(var_name, lst->var_name) == 0)
 			{
 				ret.value = lst->var_value;
 				ret.is_envp = lst->env;
-				ret.is_malloc = lst->is_malloc;
 				return (ret);
 			}
 			lst = lst->next;
 		}
+	}
 	ret.value = "$";
 	return (ret);
 }
@@ -113,9 +113,53 @@ void	change_in_list(t_vars *lst, char *var_name, char *var_value)
 			if (ft_strcmp(var_name, lst->var_name) == 0)
 			{
 				free(lst->var_value);
-				lst->is_malloc = 1;
 				lst->var_value = ft_strdup(var_value);
-				return;
+				return ;
+			}
+			lst = lst->next;
+		}
+	}
+}
+
+// deletes an item in list
+void	delete_in_list(char *var_name, t_vars **vars)
+{
+	t_vars	*temp;
+	t_vars	*prev;
+
+	temp = *vars;
+	if (temp && !ft_strcmp(var_name, temp->var_name))
+	{
+		*vars = temp->next;
+		free(temp->var_name);
+		free(temp->var_value);
+		free(temp);
+		return ;
+	}
+	while (temp && ft_strcmp(var_name, temp->var_name))
+	{
+		prev = temp;
+		temp = temp->next;
+	}
+	if (!temp)
+		return ;
+	prev->next = temp->next;
+	free(temp->var_name);
+	free(temp->var_value);
+	free(temp);
+}
+
+// updates the envp index in a list item
+void	upd_idx_in_list(t_vars *lst, char *var_name, int pos)
+{
+	if (lst != 0x0)
+	{
+		while (lst)
+		{
+			if (ft_strcmp(var_name, lst->var_name) == 0)
+			{
+				lst->env = pos;
+				return ;
 			}
 			lst = lst->next;
 		}

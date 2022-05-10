@@ -1,68 +1,47 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fill_redirects.c                                   :+:      :+:    :+:   */
+/*   pull_redirects.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: azamario <azamario@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/21 20:31:09 by vlima-nu          #+#    #+#             */
-/*   Updated: 2022/04/25 03:08:04 by azamario         ###   ########.fr       */
+/*   Updated: 2022/05/02 22:19:30 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-#define DIFF_REDIR		"minishell: syntax error near unexpected token `%c'"
+#define DIFF_REDIR	"minishell: syntax error near unexpected token `%c'"
 #define BL_IN_REDIR	"minishell: syntax error near unexpected token `newline'"
 
 static void	malloc_file(t_data *data, int string_level, int k, int bytes);
-static int	count_redirects(t_data *data, char *str);
+static int	count_redirects(char *str);
 static int	save_file(char *cmd, char **file);
 static void	find_redirects(t_data *data, int id);
 
-// void	debug_redirects(t_data *data)
-// {
-// 	int		id;
-// 	int		k;
-
-// 	id = 0;
-// 	while (data->file[id])
-// 	{
-// 		k = -1;
-// 		printf("\nid:%d\n", id);
-// 		while (data->file[id][++k])
-// 			printf("\n%d %s\n", data->file_mode[id][k], data->file[id][k]);
-// 		printf("\n%s-", data->cmds_piped[id]);
-// 		printf("cmd_len:%ld\n", strlen(data->cmds_piped[id]));
-// 		id++;
-// 	}
-// }
-
-void	fill_redirects(t_data *data)
+int	pull_redirects(t_data *data)
 {
 	int		id;
 	int		redirects_nbr;
 
 	id = 0;
-	malloc_file(data, 0, 0, data->number_of_pipes + 1);
+	malloc_file(data, 0, 0, data->number_of_pipes + 2);
 	while (data->cmds_piped[id])
 	{
-		redirects_nbr = count_redirects(data, data->cmds_piped[id]);
+		redirects_nbr = count_redirects(data->cmds_piped[id]);
+		if (redirects_nbr == -1)
+			return (FAILURE);
 		if (redirects_nbr)
 		{
 			malloc_file(data, 1, id, redirects_nbr + 1);
 			find_redirects(data, id);
 		}
+		unmask_character(data->cmds_piped[id], 4, '>');
+		unmask_character(data->cmds_piped[id], 5, '<');
 		id++;
 	}
-	id = 0;
-	while (data->cmds_piped[id])
-	{
-		reverse_char(data->cmds_piped[id], 4, '>');
-		reverse_char(data->cmds_piped[id], 5, '<');
-		id++;
-	}
-	// debug_redirects(data);
+	return (SUCCESS);
 }
 
 static void	find_redirects(t_data *data, int id)
@@ -86,8 +65,9 @@ static void	find_redirects(t_data *data, int id)
 			data->file_mode[id][k] *= 2;
 		j += 1 + (!(data->file_mode[id][k] % 2));
 		j += save_file(data->cmds_piped[id] + j, &data->file[id][k]);
-		ft_strcut(&data->cmds_piped[id], init - 1, j + 1);
-		if (!data->file[id][k])
+		ft_strcut(&data->cmds_piped[id], init - 1, j);
+		j -= init;
+		if (!data->file[id][k] || !data->cmds_piped[id])
 			exit_minishell(data, FAILURE);
 		k++;
 	}
@@ -104,14 +84,16 @@ static int	save_file(char *cmd, char **file)
 	init = total;
 	while (!ft_strchr(" ><", cmd[total]) && cmd[total])
 		total++;
+	if (cmd[total])
+		total--;
 	*file = ft_substr(cmd, init, total);
-	return (total - 1);
+	return (total);
 }
 
-static int	count_redirects(t_data *data, char *s)
+static int	count_redirects(char *s)
 {
 	int		i;
-	int		aux;
+	int		j;
 	int		redirects_nbr;
 
 	i = -1;
@@ -120,24 +102,23 @@ static int	count_redirects(t_data *data, char *s)
 	{
 		if (s[i] != '>' && s[i] != '<')
 			continue ;
-		aux = i;
-		while (ft_strchr("><", s[aux]) && s[aux])
-			aux++;
-		if ((s[i] != s[i + 1] && ft_strchr("><", s[i + 1])) || aux - i > 2)
-			printf(DIFF_REDIR, s[i + 1 + (aux - i > 2)]);
-		else if (!s[aux])
-			printf(BL_IN_REDIR);
+		j = i;
+		while (ft_strchr("><", s[i]) && s[i])
+			i++;
+		if ((s[j] != s[j + 1] && ft_strchr("><", s[j + 1])) || i - j > 2)
+			ft_printf(STDERR, DIFF_REDIR, s[i + 1 + (j - i > 2)]);
+		else if (!s[i])
+			ft_printf(STDERR, BL_IN_REDIR);
 		else
 		{
-			i += aux - i;
 			redirects_nbr++;
 			continue ;
 		}
-		exit_minishell(data, FAILURE);
+		return (-1);
 	}
 	return (redirects_nbr);
 }
- 
+
 static void	malloc_file(t_data *data, int string_level, int id, int bytes)
 {
 	if (!string_level)

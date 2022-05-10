@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_vars.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 12:30:10 by ocarlos-          #+#    #+#             */
-/*   Updated: 2022/04/25 23:55:53 by ocarlos-         ###   ########.fr       */
+/*   Updated: 2022/05/02 23:04:46 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,26 @@
 char	*get_var_name(char *input)
 {
 	int		i;
+	int		space;
 	char	*name;
 
 	i = 0;
+	space = 0;
 	while (input[i] != '=')
+	{
 		i++;
-	name = (char *)malloc(i * sizeof(char) + 1);
-	ft_strlcpy(name, input, i + 1);
+		if (input[i] == ' ')
+			space = i;
+	}
+	name = (char *)malloc((i - space) * sizeof(char));
+	if (space)
+	{
+		while (*input != ' ')
+			input++;
+		space++;
+		input++;
+	}
+	ft_strlcpy(name, input, (i - space) + 1);
 	return (name);
 }
 
@@ -50,12 +63,12 @@ char	*get_var_value(char *input)
 	return (value);
 }
 
-void	update_envp(t_data *data, char* name, char* value, t_vdt vdt)
+void	update_envp(t_data *data, char *name, char *value, t_vdt vdt)
 {
-	int	var_size;
-	int	name_size;
-	int	value_size;
-	char *new_var;
+	int		var_size;
+	int		name_size;
+	int		value_size;
+	char	*new_var;
 
 	name_size = ft_strlen(name);
 	value_size = ft_strlen(value);
@@ -64,8 +77,7 @@ void	update_envp(t_data *data, char* name, char* value, t_vdt vdt)
 	ft_strlcpy(new_var, name, name_size + 1);
 	ft_strlcat(new_var, "=", name_size + 3);
 	ft_strlcat(new_var, value, value_size + name_size + 4);
-	if (vdt.is_malloc)
-		free(data->envp[vdt.is_envp]);
+	free(data->envp[vdt.is_envp]);
 	data->envp[vdt.is_envp] = new_var;
 }
 

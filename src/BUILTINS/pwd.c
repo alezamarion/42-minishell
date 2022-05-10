@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pwd.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: azamario <azamario@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/23 21:08:58 by azamario          #+#    #+#             */
-/*   Updated: 2022/04/25 02:33:12 by azamario         ###   ########.fr       */
+/*   Updated: 2022/05/02 22:59:26 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	pwd(void)
 {
 	char	*dir;
-	
+
 	dir = getcwd(NULL, 0);
 	if (dir)
 		printf("%s\n", dir);

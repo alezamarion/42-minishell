@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/25 02:03:00 by azamario          #+#    #+#             */
-/*   Updated: 2022/04/25 23:51:50 by ocarlos-         ###   ########.fr       */
+/*   Updated: 2022/04/27 15:36:48 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	env(t_data *data)
 {
-	int i;
+	int		i;
 
 	i = 0;
 	while (data->envp[i])

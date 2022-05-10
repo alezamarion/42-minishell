@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/09 19:08:49 by joeduard          #+#    #+#             */
-/*   Updated: 2022/04/24 14:01:32 by ocarlos-         ###   ########.fr       */
+/*   Updated: 2022/04/27 01:21:09 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	welcome(void)
 {
 	char	*username;
 
-	clear();
+	printf("\033[H\033[J");
 	username = getenv("USER");
 	printf("\e[32m*******************************************\e[39m\n");
 	printf("\e[32m|                                         |\e[39m\n");
@@ -32,13 +32,13 @@ int	main(int argc, char **argv, char **envp)
 
 	if (argc > 1 && *argv)
 	{
-		ft_putendl_fd("Minishell: Too many arguments", 1);
+		ft_putendl_fd("Minishell: Too many arguments", 2);
 		return (FAILURE);
 	}
 	data = (t_data *)malloc(sizeof(t_data));
 	if (!data)
 	{
-		perror("[data] Malloc error");
+		perror("Minishell: [data] Malloc error");
 		return (FAILURE);
 	}
 	welcome();
