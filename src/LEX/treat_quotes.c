@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   treat_quotes.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: azamario <azamario@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/08 02:55:15 by azamario          #+#    #+#             */
-/*   Updated: 2022/05/02 22:25:19 by vlima-nu         ###   ########.fr       */
+/*   Updated: 2022/05/10 02:19:31 by azamario         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	pull_quotes(t_data *data)
 }
 
 /*
-	Trata os tokens e os juntam devolta na string de input.
+	Trata os tokens e os juntam de volta na string de input.
 */
 void	treat_token_strings(t_data *data)
 {
