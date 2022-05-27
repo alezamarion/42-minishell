@@ -6,112 +6,110 @@
 /*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/20 15:34:28 by ebresser          #+#    #+#             */
-/*   Updated: 2022/05/04 00:02:27 by ocarlos-         ###   ########.fr       */
+/*   Updated: 2022/05/24 23:36:37 by ocarlos-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "minishell.h"
 
-// finds the variables on argve
-int	find_vars(char **argve)
-{
-	int	i;
-
-	i = 0;
-	while (argve[i])
-	{
-		if (ft_strchr(argve[i], '$'))
-			return (i);
-		i++;
-	}
-	return (-1);
-}
-
-// creates space on the argve for the expanded variables
-void	make_space(char **argve, int start)
-{
-	int	i;
-
-	i = 0;
-	while (argve[i])
-		i++;
-	argve[i + 1] = NULL;
-	while (i > start)
-	{
-		if (argve[i])
-			free(argve[i]);
-		argve[i] = ft_strdup(argve[i - 1]);
-		i--;
-	}
-	free(argve[i]);
-}
-
-// allocates a bigger argve, copies the old to the new one and frees the old one
-char	**new_argve(char *value, t_data *data)
-{
-	char	**cmdstr;
-	char	**temp_argve;
-	int		cmdstr_size;
-	int		argve_size;
-
-	cmdstr = ft_split(value, ' ');
-	cmdstr_size = ft_str_count(cmdstr);
-	argve_size = ft_str_count(data->argve[0]);
-	temp_argve = (char **)malloc((cmdstr_size + argve_size + 1) * \
-		sizeof(char *));
-	ft_memcpy(temp_argve, data->argve[0], argve_size * sizeof(char *));
-	free(data->argve[0]);
-	data->argve[0] = temp_argve;
-	data->argve[0][argve_size] = 0x0;
-	return (cmdstr);
-}
-
-// makes room for new args and inserts it into data structure
-void	insert_new_args(t_data *data, char **cmdstr, int i)
-{
-	free(data->argve[0][i]);
-	data->argve[0][i] = ft_strdup(*cmdstr);
-	while (*(++cmdstr))
-	{
-		make_space(data->argve[0], ++i);
-		data->argve[0][i] = ft_strdup(*cmdstr);
-	}
-}
+static void	unmask_dollar_and_space(t_data *data, int id);
+static void	save_vars(t_data *data, int id, int i, char *var_value);
+static char	*pull_var_value(char *s[0], t_vars *vars);
+static char	*ret_full_value(char **s, int offset, t_vdt *vdt, int i);
 
 void	expander(t_data *data)
 {
 	int		i;
-	char	**cmdstr;
-	t_vdt	vdt;
+	int		id;
+	char	*var_value;
+
+	id = -1;
+	while (data->argve[++id])
+	{
+		while (find_vars(data->argve[id]) != -1)
+		{
+			i = find_vars(data->argve[id]);
+			var_value = pull_var_value(data->argve[id] + i, data->vars);
+			if (!var_value || !*var_value)
+			{
+				if (!*var_value)
+					ft_super_free((void **)&var_value);
+				free(data->argve[id][i]);
+				move_ptrs_back(&data->argve[id][i]);
+				continue ;
+			}
+			save_vars(data, id, i, var_value);
+		}
+		unmask_dollar_and_space(data, id);
+	}
+}
+
+static void	unmask_dollar_and_space(t_data *data, int id)
+{
+	int	i;
 
 	i = 0;
-	while (find_vars(data->argve[0]) != -1)
+	while (data->argve[id][i])
 	{
-		i = find_vars(data->argve[0]);
-		data->argve[0][i]++;
-		vdt = find_in_list(data->argve[0][i], data->vars);
-		data->argve[0][i]--;
-		if (*vdt.value == '$')
-		{
-			data->exec_flag = -1;
-			data->argve[0][i] = 0x0;
-			return ;
-		}
-		cmdstr = new_argve(vdt.value, data);
-		data->exec_flag = 1;
-		if (ft_strchr(vdt.value, ' '))
-			insert_new_args(data, cmdstr, i);
-		else
-		{
-			free(data->argve[0][i]);
-			data->argve[0][i] = ft_strdup(vdt.value);
-		}
-		i = 0;
-		while (cmdstr[i])
-			free(cmdstr[i++]);
-		free(cmdstr);
+		unmask_character(data->argve[id][i], 7, '$');
+		unmask_character(data->argve[id][i++], 1, ' ');
 	}
-	i = 0;
-	while (data->argve[0][i])
-		unmask_character(data->argve[0][i++], 7, '$');
+}
+
+static void	save_vars(t_data *data, int id, int i, char *var_value)
+{
+	char	**cmdstr;
+
+	cmdstr = new_argve(var_value, data, id);
+	if (ft_strchr(var_value, ' '))
+		insert_new_args(data, cmdstr, i, id);
+	else
+	{
+		free(data->argve[id][i]);
+		data->argve[id][i] = ft_strdup(var_value);
+	}
+	double_free((void ***)&cmdstr);
+	ft_super_free((void **)&var_value);
+}
+
+static char	*pull_var_value(char **s, t_vars *vars)
+{
+	char	*var_name;
+	int		offset;
+	int		i;
+	t_vdt	vdt;
+
+	offset = 0;
+	while (s[0][offset] != '$')
+		offset++;
+	i = offset + 1;
+	while ((ft_isalnum(s[0][i]) || s[0][i] == '_') && s[0][i])
+		i++;
+	if (s[0][i] == '?')
+		i++;
+	var_name = ft_substr(s[0], offset, i - offset);
+	vdt = find_in_list(var_name, vars);
+	free(var_name);
+	return (ret_full_value(s, offset, &vdt, i));
+}
+
+static char	*ret_full_value(char **s, int offset, t_vdt *vdt, int i)
+{
+	char	*ret;
+	char	*prefix;
+
+	if (!vdt->value)
+	{
+		ft_strcut(s, offset, i);
+		return (ft_strdup(*s));
+	}
+	else
+	{
+		prefix = ft_substr(*s, 0, offset);
+		ret = ft_mult_join(3, prefix, vdt->value, *s + i);
+		if (vdt->is_allocated)
+			free(vdt->value);
+		free(prefix);
+	}
+	return (ret);
 }

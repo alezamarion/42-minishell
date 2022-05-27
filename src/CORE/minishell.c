@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/13 20:28:30 by ebresser          #+#    #+#             */
-/*   Updated: 2022/05/04 01:13:05 by ocarlos-         ###   ########.fr       */
+/*   Updated: 2022/05/14 11:45:37 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "minishell.h"
 
 void	minishell(t_data *data)
 {
@@ -19,7 +19,8 @@ void	minishell(t_data *data)
 	data_clean(data);
 	if (take_input(data) || lexer(data))
 		return ;
-	parser(data);
 	expander(data);
+	if (parser(data))
+		return ;
 	executor(data);
 }

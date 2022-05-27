@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   parse_vars.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: ocarlos- <ocarlos-@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 12:30:10 by ocarlos-          #+#    #+#             */
-/*   Updated: 2022/05/02 23:04:46 by vlima-nu         ###   ########.fr       */
+/*   Updated: 2022/05/22 17:33:19 by ocarlos-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "minishell.h"
+
+static void	update_var(t_data *data, char *name, char *value);
 
 // gets and returns the name of the variable
 char	*get_var_name(char *input)
@@ -27,7 +29,7 @@ char	*get_var_name(char *input)
 		if (input[i] == ' ')
 			space = i;
 	}
-	name = (char *)malloc((i - space) * sizeof(char));
+	name = (char *)malloc((i - space) * sizeof(char) + 1);
 	if (space)
 	{
 		while (*input != ' ')
@@ -49,15 +51,8 @@ char	*get_var_value(char *input)
 	while (*input != '=')
 		input++;
 	input++;
-	if (*input == '\"')
-	{
-		input++;
-		while (input[i] != '\"' && input[i])
-			i++;
-	}
-	else
-		while (input[i])
-			i++;
+	while (input[i])
+		i++;
 	value = (char *)malloc(i * sizeof(char) + 1);
 	ft_strlcpy(value, input, i + 1);
 	return (value);
@@ -81,33 +76,40 @@ void	update_envp(t_data *data, char *name, char *value, t_vdt vdt)
 	data->envp[vdt.is_envp] = new_var;
 }
 
+static void	update_var(t_data *data, char *name, char *value)
+{
+	t_vdt	vdt;
+
+	vdt = find_in_list(name, data->vars);
+	if (!vdt.value)
+		add_to_list(&data->vars, name, value);
+	else
+	{
+		if (vdt.is_envp >= 0)
+			update_envp(data, name, value, vdt);
+		change_in_list(data->vars, name, value);
+	}
+	if (ft_strcmp(name, "PATH") == 0)
+		update_command_path(data);
+}
+
 // checks for variables in the input string and stores them on a linked list
-void	grab_vars(t_data *data, char *str)
+int	grab_vars(t_data *data, char *str)
 {
 	char	*name;
 	char	*value;
-	t_vdt	vdt;
 
-	if (ft_strchr(str, '='))
-	{
-		data->exec_flag = -1;
-		name = get_var_name(str);
-		value = get_var_value(str);
-		if (!data->vars)
-			data->vars = new_node(name, value);
-		else
-		{
-			vdt = find_in_list(name, data->vars);
-			if (ft_strcmp(vdt.value, "$") == 0)
-				add_to_list(&data->vars, name, value);
-			else
-			{
-				if (vdt.is_envp >= 0)
-					update_envp(data, name, value, vdt);
-				change_in_list(data->vars, name, value);
-			}
-		}
-		free(name);
-		free(value);
-	}
+	if (!ft_strchr(str, '='))
+		return (FALSE);
+	if (data->number_of_pipes >= 1)
+		return (TRUE);
+	name = get_var_name(str);
+	value = get_var_value(str);
+	if (!data->vars)
+		data->vars = new_node(name, value);
+	else
+		update_var(data, name, value);
+	free(name);
+	free(value);
+	return (TRUE);
 }

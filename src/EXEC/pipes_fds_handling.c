@@ -6,11 +6,11 @@
 /*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/08 23:19:00 by ebresser          #+#    #+#             */
-/*   Updated: 2022/05/02 22:31:39 by vlima-nu         ###   ########.fr       */
+/*   Updated: 2022/05/10 10:43:02 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "minishell.h"
 
 int	open_pipes(t_data *data)
 {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ebresser <ebresser@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/14 18:05:41 by azamario          #+#    #+#             */
-/*   Updated: 2022/03/16 22:26:24 by ebresser         ###   ########.fr       */
+/*   Updated: 2022/05/15 12:09:34 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 # include <stdio.h>
 # include <unistd.h>
 # include <fcntl.h>
+# include <stdarg.h>
 //# include <bsd/string.h>
 
 void		*ft_memset(void *b, int c, size_t len);
@@ -54,7 +55,7 @@ void		*ft_calloc(size_t count, size_t size);
 char		*ft_strdup(const char *s1);
 int			ft_get_next_line(int fd, char **line);
 void		ft_super_free(void **ptr);
-
+char		*ft_strcat(char *s1, char *s2);
 char		*ft_substr(char const *s, unsigned int start, size_t len);
 char		*ft_strjoin(char const *s1, char const *s2);
 char		*ft_strtrim(char const *s1, char const *set);
@@ -65,6 +66,7 @@ void		ft_putchar_fd(char c, int fd);
 void		ft_putstr_fd(char *s, int fd);
 void		ft_putendl_fd(char *s, int fd);
 void		ft_putnbr_fd(int n, int fd);
+char		*ft_mult_join(unsigned int nbr_of_strs, ...);
 
 typedef struct s_list
 {

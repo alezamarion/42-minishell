@@ -12,11 +12,11 @@
 
 #include "../inc/ft_printf.h"
 
-t_str	*toward_specifier(t_str *format)
+t_str	*toward_specifier(t_str *f)
 {
-	while (!ft_strchr(TYPES, *format) && *format)
-		format++;
-	return (format + 1);
+	while (!ft_strchr(TYPES, *f) && *f)
+		f++;
+	return (f + 1);
 }
 
 int	printchar(int fd, int width, char c, int offset)

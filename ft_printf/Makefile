@@ -1,6 +1,6 @@
 NAME		=	libftprintf.a
-FLAGS		=	-Wall -Wextra -Werror -g3 -O3
-CC			= 	clang
+FLAGS		=	-Wall -Wextra #-Werror -g3 -O3
+#CC			= 	clang
 RM			=	rm -fr
 MK			=	make -C
 LIBPATH		=	../libft
@@ -25,7 +25,7 @@ OBJ			=	$(addprefix obj/, $(notdir $(SRC:.c=.o)))
 all:		$(NAME)
 
 $(NAME):	$(LIB)
-	@$(CC) $(FLAGS) -I ./inc -c -fPIE $(SRC)
+	@$(CC) $(FLAGS) -I ./inc -c $(SRC)
 	@mkdir -p obj
 	@mv $(notdir $(SRC:.c=.o)) obj
 	@$(AR) $(NAME) $(OBJ)

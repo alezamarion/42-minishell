@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   mask_n_unmask_chars.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: ebresser <ebresser@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/02 22:18:03 by vlima-nu          #+#    #+#             */
-/*   Updated: 2022/05/02 22:22:25 by vlima-nu         ###   ########.fr       */
+/*   Updated: 2022/05/24 21:12:44 by ebresser         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "minishell.h"
 
 #define UNCLOSED_QUOTES "Minishell: Sintaxe Error: Unclosed quotes `%c'\n"
 
@@ -48,15 +48,16 @@ void	unmask_character(char *cmd, int nbr, char c)
 }
 
 /*
-	Substitui os caracteres ' ', '>', '<', '|' e '$' por um não imprimível.
-	E.g
-	echo "'jorge ale"\0
-	echo "'jorge1ale"\0
+	Replace characters ' ', '>', '<', '|' and '$' for a non-printable one.
 */
 int	mask_all_chars(t_data *data)
 {
 	if (mask_character(data->input, ' ', 1))
+	{
+		g_status_code = SINTAX_ERR;
 		return (FAILURE);
+	}
+	mask_character(data->input, '&', 8);
 	mask_character(data->input, '|', 6);
 	mask_character(data->input, '>', 4);
 	mask_character(data->input, '<', 5);

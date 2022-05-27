@@ -6,11 +6,11 @@
 /*   By: vlima-nu <vlima-nu@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/20 12:16:34 by ebresser          #+#    #+#             */
-/*   Updated: 2022/05/02 22:33:41 by vlima-nu         ###   ########.fr       */
+/*   Updated: 2022/05/24 00:05:45 by vlima-nu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "minishell.h"
 
 int	is_builtins(char *cmd)
 {
@@ -23,12 +23,12 @@ int	is_builtins(char *cmd)
 	builtin_cmd[0] = "exit";
 	builtin_cmd[1] = "cd";
 	builtin_cmd[2] = "echo";
-	builtin_cmd[3] = "hello";
-	builtin_cmd[4] = "help";
-	builtin_cmd[5] = "pwd";
-	builtin_cmd[6] = "env";
-	builtin_cmd[7] = "export";
-	builtin_cmd[8] = "unset";
+	builtin_cmd[3] = "pwd";
+	builtin_cmd[4] = "env";
+	builtin_cmd[5] = "export";
+	builtin_cmd[6] = "unset";
+	if (!cmd)
+		return (0);
 	while (++i < NUMBER_OF_BUILTINS)
 	{
 		if (ft_strcmp(cmd, builtin_cmd[i]) == 0)

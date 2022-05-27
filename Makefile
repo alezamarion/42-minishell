@@ -1,72 +1,66 @@
 NAME		=	minishell
+
 CC			=	gcc
-CFLAGS		=	-Wall -Wextra -Werror -lreadline -g -fsanitize=address 
+CFLAGS		=	-Wall -Wextra -Werror -lreadline -g -fsanitize=address
+
 LIBFT_DIR	=	libft
 LIBFT		=	$(LIBFT_DIR)/libft.a
-LIBFLAGS	=	-L $(LIBFT_DIR) -lft
+LIBFLAGS	=	-L $(LIBFT_DIR) -lft -lreadline
+
 PRINTF_DIR	=	ft_printf
 PRINTF		=	ft_printf/libftprintf.a
-VPATH 		= 	src src/CORE src/PROMPT src/LEX \
-				src/PARSE src/EXPAND src/EXEC \
-				src/BUILTINS src/TOOLS
+
+INC			=	-I inc
 RM			=	rm -fr
-HEADERS		=	minishell.h
 
-SRC_FILES	=	main.c \
-				minishell.c \
-				hello.c \
-				clear_data.c \
-				init_data.c \
-				prompt_take_input.c \
-				history.c \
-				lexer.c \
-				pull_redirects.c \
-				parser.c \
-				redirects.c \
-				expand_variables.c \
-				sorting.c \
-				executor.c \
-				exit.c \
-				help.c \
-				echo.c \
-				env.c \
-				export.c \
-				unset.c \
-				str_tools.c \
-				here_document.c \
-				execute_one_cmd.c \
-				mask_n_unmask_chars.c \
-				cd.c \
-				pwd.c \
-				list_tools.c \
-				parse_vars.c \
-				treat_quotes.c \
-				mask_dollar.c \
-				pipes_fds_handling.c \
-				processes_handler.c \
-				signals.c
+BUILTINS	=	cd.c echo.c env.c exit.c export.c export_utils.c pwd.c unset.c
+CORE		=	clear_data.c init_data.c minishell.c signals.c main.c
+EXEC		=	execute_one_cmd.c executor.c here_document.c pipes_fds_handling.c \
+				processes_handler.c redirects.c sorting.c
+EXPAND		=	expand_variables.c expand_utils.c
+LEX			=	lexer.c mask_dollar.c mask_n_unmask_chars.c \
+				pull_redirects.c treat_quotes.c treat_spaces.c
+PARSE		=	parse_vars.c parser.c
+TOOLS		=	list_tools_one.c list_tools_two.c str_tools_one.c str_tools_two.c
+PROMPT		=	history.c prompt_take_input.c
 
-OBJ			=	$(SRC_FILES:%.c=%.o)
-OBJ_DIR		=	obj
+SRCS_DIR	=	src
 
-$(OBJ_DIR)/%.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES)
+FILES		=	$(addprefix BUILTINS/, $(BUILTINS)) \
+				$(addprefix EXPAND/, $(EXPAND)) \
+				$(addprefix PROMPT/, $(PROMPT)) \
+				$(addprefix PARSE/, $(PARSE)) \
+				$(addprefix TOOLS/, $(TOOLS)) \
+				$(addprefix CORE/, $(CORE)) \
+				$(addprefix EXEC/, $(EXEC)) \
+				$(addprefix LEX/, $(LEX)) \
+
+SOURCE			=	$(addprefix src/, $(FILES))
+
+OBJS_DIR	=	obj
+OBJS		=	$(subst $(SRCS_DIR),$(OBJS_DIR),$(SOURCE:.c=.o))
 
 all: $(NAME)
 
-$(NAME): $(OBJ_DIR) $(LIBFT) $(OBJ)
-	mv $(OBJ) $(OBJ_DIR)
-	$(CC) $(addprefix obj/, $(OBJ)) $(LIBFT) $(PRINTF) $(CFLAGS) $(LIBFLAGS) -fPIE -o $@
+$(NAME): $(OBJS)
+	make -C $(LIBFT_DIR)
+	make -C $(PRINTF_DIR)
+	@-$(CC) $(CFLAGS) $(OBJS) $(LIBFT) $(PRINTF) $(LIBFLAGS) -o $@
 	@echo ""
 	@echo "|		minishell created		|"
 	@echo ""
 
-$(LIBFT):
-		make -C $(LIBFT_DIR)
-		make -C $(PRINTF_DIR)
-
-$(OBJ_DIR):
-		mkdir -p $(OBJ_DIR)
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c
+		@mkdir -p obj
+		@mkdir -p obj/BUILTINS
+		@mkdir -p obj/CORE
+		@mkdir -p obj/EXEC
+		@mkdir -p obj/EXPAND
+		@mkdir -p obj/LEX
+		@mkdir -p obj/PARSE
+		@mkdir -p obj/PROMPT
+		@mkdir -p obj/TOOLS
+		$(CC) $(CFLAGS) $(INC) -c $< -o $@
 
 clean:
 	make -C $(LIBFT_DIR) fclean
@@ -76,7 +70,7 @@ clean:
 	@echo ""
 
 fclean: clean
-	$(RM) $(OBJ_DIR)
+	$(RM) obj
 	$(RM) $(NAME)
 
 install:

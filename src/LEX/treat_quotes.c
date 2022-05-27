@@ -3,66 +3,64 @@
 /*                                                        :::      ::::::::   */
 /*   treat_quotes.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: azamario <azamario@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: ebresser <ebresser@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/08 02:55:15 by azamario          #+#    #+#             */
-/*   Updated: 2022/05/10 02:19:31 by azamario         ###   ########.fr       */
+/*   Updated: 2022/05/24 21:22:29 by ebresser         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "minishell.h"
 
 /*
-	Mascara todos os caracteres de sintaxe e espaços entre aspas,
-	divide o input em tokens
-	(o que estiver entre aspas é um token) e remove as aspas deles.
-	Por fim converte os tokens em uma nova string de input.
+	Masks all syntax characters and spaces in quotes,
+	splits input into tokens
+	(whatever is in quotes is a token) and removes the quotes from them.
+	Finally converts the tokens into a new input string.
 */
 int	pull_quotes(t_data *data)
 {
 	if (mask_all_chars(data))
 		return (FAILURE);
-	data->tokens = ft_split(data->input, ' ');
+	remove_extra_spaces(data);
 	treat_token_strings(data);
 	return (SUCCESS);
 }
 
 /*
-	Trata os tokens e os juntam de volta na string de input.
+	Handles the tokens and merges them back into the input string.
 */
 void	treat_token_strings(t_data *data)
 {
+	char	**tokens;
 	char	*buf;
 	char	*string;
 	int		i;
 
-	i = 0;
+	i = -1;
 	string = NULL;
-	while (data->tokens[i])
+	tokens = ft_split(data->input, ' ');
+	while (tokens[++i])
 	{
-		treat_quotes(data->tokens[i]);
-		no_quotes(data->tokens[i]);
+		treat_quotes(tokens[i]);
+		no_quotes(tokens[i]);
 		if (!string)
-			string = tokens_to_string(string, data->tokens[i]);
+			string = tokens_to_string(string, tokens[i]);
 		else
 		{
-			buf = tokens_to_string(string, data->tokens[i]);
+			buf = tokens_to_string(string, tokens[i]);
 			free(string);
 			string = ft_strdup(buf);
 			free(buf);
 		}
-		i++;
 	}
+	double_free((void ***)&tokens);
 	free(data->input);
-	data->input = ft_strdup(string);
-	free(string);
+	data->input = string;
 }
 
 /*
-	Substitui as aspas internas por 2 ou 3.
-	E.g
-	echo\0 "'jorge'1ale"\0.
-	echo\0 "3jorge31ale"\0.
+	Replaces the inner quotes with 2 or 3.
 */
 void	treat_quotes(char *token)
 {
@@ -92,7 +90,8 @@ void	treat_quotes(char *token)
 }
 
 /*
-	Retira as aspas "3jorge31ale"\0 e depois reverte aspas escondidas: 'jorge'1ale\0
+	Remove the quotes "3 guarana 31bolo"\0 and then reverse the hidden quotes: 
+	'guarana'1bolo\0
 */
 void	no_quotes(char *token)
 {
