@@ -1,6 +1,10 @@
 # minishell42
 
-## Data struct: Redirects
+Minishell is the 8th project at 42.
+
+It tasks us to create a 'simple' shell. Yes, your little bash or zsh.
+
+<br>
 
 Para voltar ao modo normal, setar em src/EXEC/executor - linha 143 a flag para **false**:<br/><br/>
 //TESTE-------------------------- > >>  MEXER AQUI --------------------------<br/>
