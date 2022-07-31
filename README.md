@@ -10,7 +10,6 @@ Terminate: After your commands are executed, the shell executes any shutdown com
 
 ____________________________________
 
-
 Fazendo seu próprio Linux Shell em C. O shell é o “prompt” da linha de comando do linux, que recebe os comandos digitados pelo usuários e os executa
 
 Um shell faz três coisas principais em sua vida:
