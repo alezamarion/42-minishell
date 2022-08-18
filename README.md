@@ -1,4 +1,4 @@
-# minishell42
+# minishell
 
 Making your own Linux Shell in C. 
 
@@ -60,7 +60,7 @@ minishell $ make re
 ```
 See Makefile<br/>
 
-### Made with: <br/><br>
+### Made with:
 
 ### Alexandre Zamarion
 <div style="display: inline_block">
